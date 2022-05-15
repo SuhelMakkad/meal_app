@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 
 class MealDetailScreen extends StatelessWidget {
-  const MealDetailScreen({Key? key}) : super(key: key);
+  const MealDetailScreen(this.isFavorite, this.toggleFavorite, {Key? key})
+      : super(key: key);
 
   static const routeName = "/meal-detail";
+
+  final bool Function(String) isFavorite;
+  final void Function(String) toggleFavorite;
 
   Widget buildSectionTitle(
     BuildContext context,
@@ -41,6 +45,7 @@ class MealDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mealId = ModalRoute.of(context)!.settings.arguments as String;
     final selectedMeal = dummyMeals.firstWhere((meal) => meal.id == mealId);
+    final isMarkedFav = isFavorite(mealId);
 
     return Scaffold(
       appBar: AppBar(title: Text(selectedMeal.title)),
@@ -113,9 +118,8 @@ class MealDetailScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.delete),
-        onPressed: () => Navigator.of(context).pop(mealId),
-        backgroundColor: Theme.of(context).colorScheme.error,
+        child: Icon(isMarkedFav ? Icons.star : Icons.star_border),
+        onPressed: () => toggleFavorite(mealId),
       ),
     );
   }
