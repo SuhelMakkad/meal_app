@@ -6,14 +6,56 @@ import './screens/filters_screen.dart';
 import './screens/category_meals_screen.dart';
 import './screens/meal_detail_screen.dart';
 
+import './models/meal.dart';
+import './data/dummy_data.dart';
+
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Map<String, bool> _filters = {
+    "gluten": false,
+    "lactose": false,
+    "vegan": false,
+    "vegetarian": false,
+  };
+
+  List<Meal> _availabeleMeals = dummyMeals;
+
+  void _setFilters(Map<String, bool> filterData) {
+    setState(() {
+      _filters = filterData;
+
+      _availabeleMeals = dummyMeals.where((meal) {
+        if (_filters["gluten"] == true && !meal.isGlutenFree) {
+          return false;
+        }
+
+        if (_filters["lactose"] == true && !meal.isLactoseFree) {
+          return false;
+        }
+
+        if (_filters["vegan"] == true && !meal.isVegan) {
+          return false;
+        }
+
+        if (_filters["vegetarian"] == true && !meal.isVegetarian) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -42,40 +84,16 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         "/": (ctx) => const TabsScreen(),
-        CategoryMealsScreen.routeName: (ctx) => const CategoryMealsScreen(),
+        CategoryMealsScreen.routeName: (ctx) =>
+            CategoryMealsScreen(_availabeleMeals),
         MealDetailScreen.routeName: (ctx) => const MealDetailScreen(),
-        FiltersScreen.routeName: (ctx) => const FiltersScreen(),
+        FiltersScreen.routeName: (ctx) => FiltersScreen(_filters, _setFilters),
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
           builder: (ctx) => const CategoriesScreen(),
         );
       },
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Deli Meals"),
-      ),
-      body: const Center(
-        child: Text(
-          'Navigation Time',
-        ),
-      ),
     );
   }
 }
